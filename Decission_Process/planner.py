@@ -1,5 +1,6 @@
 class Planner():
-
+    """
+    """
     def __init__(self, env):
         self.env = env
         self.log = []
@@ -12,6 +13,9 @@ class Planner():
         raise Exception("Planner have to implements plan method.")
 
     def transitions_at(self, state, action):
+        """
+        遷移関数 T(s'|s,a) （状態と行動のペアから次の遷移先と遷移確率を返す）
+        """
         transition_probs = self.env.transit_func(state, action)
         for next_state in transition_probs:
             prob = transition_probs[next_state]
@@ -30,7 +34,9 @@ class Planner():
 
 
 class ValueIterationPlanner(Planner):
-
+    """
+    価値反復法（動的計画法による価値評価の学習）
+    """
     def __init__(self, env):
         super().__init__(env)
 
@@ -39,11 +45,11 @@ class ValueIterationPlanner(Planner):
         actions = self.env.actions
         V = {}
         for s in self.env.states:
-            # Initialize each state's expected reward.
+            # 各状態の期待報酬を初期化
             V[s] = 0
 
         while True:
-            delta = 0
+            delta = 0 # 価値の更新幅
             self.log.append(self.dict_to_grid(V))
             for s in V:
                 if not self.env.can_action_at(s):
@@ -66,13 +72,16 @@ class ValueIterationPlanner(Planner):
 
 
 class PolicyIterationPlanner(Planner):
-
+    """
+    動的計画法による戦略の学習
+    """
     def __init__(self, env):
         super().__init__(env)
         self.policy = {}
 
     def initialize(self):
         super().initialize()
+        # policy は各状態における行動確率を格納する変数
         self.policy = {}
         actions = self.env.actions
         states = self.env.states
@@ -80,10 +89,14 @@ class PolicyIterationPlanner(Planner):
             self.policy[s] = {}
             for a in actions:
                 # Initialize policy.
-                # At first, each action is taken uniformly.
+                # 最初は, どの行動についても等確率で行われる
                 self.policy[s][a] = 1 / len(actions)
 
     def estimate_by_policy(self, gamma, threshold):
+        """
+        戦略による価値の計算
+        V_pi(s)=\sum_a \pi(a|s)\sum_s' T(s'|s,a){R(s,s')+gamma V_pi(s')}
+        """
         V = {}
         for s in self.env.states:
             # Initialize each state's expected reward.
@@ -109,6 +122,9 @@ class PolicyIterationPlanner(Planner):
         return V
 
     def plan(self, gamma=0.9, threshold=0.0001):
+        """
+        戦略の評価
+        """
         self.initialize()
         states = self.env.states
         actions = self.env.actions

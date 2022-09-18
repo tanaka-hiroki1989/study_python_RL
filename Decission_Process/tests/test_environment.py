@@ -1,6 +1,6 @@
 import random
 import unittest
-from DP.environment import Environment
+from Decission_Process.environment import Environment
 
 
 class TestEnvironment(unittest.TestCase):

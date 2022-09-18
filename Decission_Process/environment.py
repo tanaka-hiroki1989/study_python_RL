@@ -3,7 +3,9 @@ import numpy as np
 
 
 class State():
-
+    """
+    セルの位置
+    """
     def __init__(self, row=-1, column=-1):
         self.row = row
         self.column = column
@@ -22,6 +24,9 @@ class State():
 
 
 class Action(Enum):
+    """
+    上下左右の行動を表現
+    """
     UP = 1
     DOWN = -1
     LEFT = 2
@@ -29,7 +34,9 @@ class Action(Enum):
 
 
 class Environment():
-
+    """
+    環境の実体
+    """
     def __init__(self, grid, move_prob=0.8):
         # grid is 2d-array. Its values are treated as an attribute.
         # Kinds of attribute is following.
@@ -74,6 +81,23 @@ class Environment():
         return states
 
     def transit_func(self, state, action):
+        """
+        遷移関数
+        Params
+        ----
+        state:
+        action:
+
+        Returns
+        ----
+        transition probs: 遷移確率
+
+        選択した行動にはself.move_prob, 
+        逆方向以外の行動には残りの確率を等分した確率が割り当てられる
+
+        遷移先は選択された方向に移動したセルになるが,
+        迷路の範囲外に出る場合は, 元のセルに戻される
+        """
         transition_probs = {}
         if not self.can_action_at(state):
             # Already on the terminal cell.
@@ -97,6 +121,8 @@ class Environment():
         return transition_probs
 
     def can_action_at(self, state):
+        """
+        """
         if self.grid[state.row][state.column] == 0:
             return True
         else:
@@ -131,6 +157,18 @@ class Environment():
         return next_state
 
     def reward_func(self, state):
+        """
+        報酬関数
+
+        Params
+        ---
+        state
+
+        Returns
+        ---
+        reward: 報酬
+        done: 報酬が与えられた, もしくはダメージを受けた
+        """
         reward = self.default_reward
         done = False
 
@@ -148,11 +186,13 @@ class Environment():
         return reward, done
 
     def reset(self):
+        # 移動したエージェントの位置を初期化
         # Locate the agent at lower left corner.
         self.agent_state = State(self.row_length - 1, 0)
         return self.agent_state
 
     def step(self, action):
+        # エージェントから行動を受け取って, 次の遷移先と即時報酬を計算
         next_state, reward, done = self.transit(self.agent_state, action)
         if next_state is not None:
             self.agent_state = next_state
@@ -160,7 +200,22 @@ class Environment():
         return next_state, reward, done
 
     def transit(self, state, action):
+        """
+        Params
+        ---
+        state
+        action
+
+        Returns
+        ---
+        next_state: 遷移先
+        reward: 即時報酬
+        done:
+        """
+
+        # 遷移関数により遷移確率を求める
         transition_probs = self.transit_func(state, action)
+
         if len(transition_probs) == 0:
             return None, None, True
 
@@ -169,7 +224,8 @@ class Environment():
         for s in transition_probs:
             next_states.append(s)
             probs.append(transition_probs[s])
-
+        # 遷移確率に従って, 遷移先を決定
         next_state = np.random.choice(next_states, p=probs)
+        # 報酬関数を用いて, 即時報酬を計算
         reward, done = self.reward_func(next_state)
         return next_state, reward, done

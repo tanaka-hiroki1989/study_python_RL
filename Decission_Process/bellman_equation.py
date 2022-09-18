@@ -1,9 +1,15 @@
 def V(s, gamma=0.99):
+    """
+    特に, 報酬が状態のみで決まる場合が実装されている
+    """
     V = R(s) + gamma * max_V_on_next_state(s)
     return V
 
 
 def R(s):
+    """
+    報酬関数, エピソード終了時点で報酬を返す
+    """
     if s == "happy_end":
         return 1
     elif s == "bad_end":
@@ -13,10 +19,14 @@ def R(s):
 
 
 def max_V_on_next_state(s):
+    """
+    すべての行動に対し,vを計算し, 値が最大になる価値をとる.
+    vは遷移確率と遷移先の価値の積で計算される.
+    """
     # If game end, expected value is 0.
     if s in ["happy_end", "bad_end"]:
         return 0
-
+    
     actions = ["up", "down"]
     values = []
     for a in actions:

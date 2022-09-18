@@ -8,11 +8,14 @@ class Agent():
         self.actions = env.actions
 
     def policy(self, state):
+        """
+        状態を受け取り行動を返す関数だが, ここではランダムに行動するだけ
+        """
         return random.choice(self.actions)
 
 
 def main():
-    # Make grid environment.
+    "迷路の定義を行い, それをもとに環境を作成"
     grid = [
         [0, 0, 0, 1],
         [0, 9, 0, -1],
@@ -38,4 +41,6 @@ def main():
 
 
 if __name__ == "__main__":
+    #TODO 遷移関数, 報酬関数を変更できるようにする
+    #TODO エージェントのたどった状態が参照できるようにする
     main()
